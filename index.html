@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Sounds Generator</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --secondary: #2c3e50;
+            --accent: #3498db;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: var(--light);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .sound-card {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: var(--shadow);
+        }
+
+        .sound-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sound-card h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .sound-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .sound-card .play-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .sound-card .play-btn:hover {
+            background: var(--accent);
+        }
+
+        .mixer {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .mixer-item {
+            background: var(--light);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .mixer-item h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .slider-container {
+            margin-bottom: 10px;
+        }
+
+        .slider-container label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: #dfe6e9;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            cursor: pointer;
+        }
+
+        .mixer-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .mixer-controls button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .play-all {
+            background: var(--success);
+            color: white;
+        }
+
+        .stop-all {
+            background: var(--danger);
+            color: white;
+        }
+
+        .visualizer {
+            width: 100%;
+            height: 200px;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualizer canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-section h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .sound-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .mixer {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 Water Sounds Generator</h1>
+            <p class="subtitle">Create, mix, and relax with the sounds of water</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="soundboard">Soundboard</button>
+            <button class="tab" data-tab="mixer">Ambient Mixer</button>
+            <button class="tab" data-tab="visualizer">Visualizer</button>
+            <button class="tab" data-tab="about">About</button>
+        </div>
+
+        <!-- Soundboard Tab -->
+        <div class="tab-content active" id="soundboard">
+            <h2>Soundboard</h2>
+            <p>Click on any card to play the sound. Click again to stop.</p>
+            <div class="sound-grid">
+                <!-- Natural Water Sounds -->
+                <div class="sound-card" data-sound="ocean-waves">
+                    <div class="icon">🌊</div>
+                    <h3>Ocean Waves</h3>
+                    <button class="play-btn" onclick="playSound('ocean-waves')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="seashore">
+                    <div class="icon">🏖️</div>
+                    <h3>Seashore</h3>
+                    <button class="play-btn" onclick="playSound('seashore')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="river">
+                    <div class="icon">🏞️</div>
+                    <h3>River Flow</h3>
+                    <button class="play-btn" onclick="playSound('river')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="waterfall">
+                    <div class="icon">💦</div>
+                    <h3>Waterfall</h3>
+                    <button class="play-btn" onclick="playSound('waterfall')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="rain">
+                    <div class="icon">🌧️</div>
+                    <h3>Rain</h3>
+                    <button class="play-btn" onclick="playSound('rain')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="dripping">
+                    <div class="icon">💧</div>
+                    <h3>Dripping</h3>
+                    <button class="play-btn" onclick="playSound('dripping')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="thunderstorm">
+                    <div class="icon">⛈️</div>
+                    <h3>Thunderstorm</h3>
+                    <button class="play-btn" onclick="playSound('thunderstorm')">Play</button>
+                </div>
+
+                <!-- Underwater Sounds -->
+                <div class="sound-card" data-sound="bubbles">
+                    <div class="icon">🫧</div>
+                    <h3>Bubbles</h3>
+                    <button class="play-btn" onclick="playSound('bubbles')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="underwater">
+                    <div class="icon">🐠</div>
+                    <h3>Underwater</h3>
+                    <button class="play-btn" onclick="playSound('underwater')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="sonar">
+                    <div class="icon">📡</div>
+                    <h3>Sonar</h3>
+                    <button class="play-btn" onclick="playSound('sonar')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="whale">
+                    <div class="icon">🐋</div>
+                    <h3>Whale Calls</h3>
+                    <button class="play-btn" onclick="playSound('whale')">Play</button>
+                </div>
+
+                <!-- Human-Made Sounds -->
+                <div class="sound-card" data-sound="splash">
+                    <div class="icon">💥</div>
+                    <h3>Splash</h3>
+                    <button class="play-btn" onclick="playSound('splash')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="faucet">
+                    <div class="icon">🚰</div>
+                    <h3>Faucet</h3>
+                    <button class="play-btn" onclick="playSound('faucet')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="boiling">
+                    <div class="icon">☕</div>
+                    <h3>Boiling</h3>
+                    <button class="play-btn" onclick="playSound('boiling')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="fountain">
+                    <div class="icon">⛲</div>
+                    <h3>Fountain</h3>
+                    <button class="play-btn" onclick="playSound('fountain')">Play</button>
+                </div>
+
+                <!-- Abstract Sounds -->
+                <div class="sound-card" data-sound="scifi-water">
+                    <div class="icon">👽</div>
+                    <h3>Sci-Fi Water</h3>
+                    <button class="play-btn" onclick="playSound('scifi-water')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="magical-water">
+                    <div class="icon">✨</div>
+                    <h3>Magical Water</h3>
+                    <button class="play-btn" onclick="playSound('magical-water')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="cartoon-water">
+                    <div class="icon">🎨</div>
+                    <h3>Cartoon Water</h3>
+                    <button class="play-btn" onclick="playSound('cartoon-water')">Play</button>
+                </div>
+                <div class="sound-card" data-sound="steam">
+                    <div class="icon">☁️</div>
+                    <h3>Steam</h3>
+                    <button class="play-btn" onclick="playSound('steam')">Play</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mixer Tab -->
+        <div class="tab-content" id="mixer">
+            <h2>Ambient Mixer</h2>
+            <p>Mix multiple water sounds to create your perfect ambiance.</p>
+            <div class="mixer">
+                <div class="mixer-item">
+                    <h3>Ocean Waves</h3>
+                    <div class="slider-container">
+                        <label for="ocean-volume">Volume</label>
+                        <input type="range" id="ocean-volume" class="slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="mixer-controls">
+                        <button onclick="toggleSound('ocean-waves')">Toggle</button>
+                    </div>
+                </div>
+                <div class="mixer-item">
+                    <h3>Rain</h3>
+                    <div class="slider-container">
+                        <label for="rain-volume">Volume</label>
+                        <input type="range" id="rain-volume" class="slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="mixer-controls">
+                        <button onclick="toggleSound('rain')">Toggle</button>
+                    </div>
+                </div>
+                <div class="mixer-item">
+                    <h3>River Flow</h3>
+                    <div class="slider-container">
+                        <label for="river-volume">Volume</label>
+                        <input type="range" id="river-volume" class="slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="mixer-controls">
+                        <button onclick="toggleSound('river')">Toggle</button>
+                    </div>
+                </div>
+                <div class="mixer-item">
+                    <h3>Bubbles</h3>
+                    <div class="slider-container">
+                        <label for="bubbles-volume">Volume</label>
+                        <input type="range" id="bubbles-volume" class="slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="mixer-controls">
+                        <button onclick="toggleSound('bubbles')">Toggle</button>
+                    </div>
+                </div>
+                <div class="mixer-item">
+                    <h3>Thunderstorm</h3>
+                    <div class="slider-container">
+                        <label for="thunder-volume">Volume</label>
+                        <input type="range" id="thunder-volume" class="slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="mixer-controls">
+                        <button onclick="toggleSound('thunderstorm')">Toggle</button>
+                    </div>
+                </div>
+                <div class="mixer-item">
+                    <h3>Underwater</h3>
+                    <div class="slider-container">
+                        <label for="underwater-volume">Volume</label>
+                        <input type="range" id="underwater-volume" class="slider" min="0" max="100" value="0">
+                    </div>
+                    <div class="mixer-controls">
+                        <button onclick="toggleSound('underwater')">Toggle</button>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; margin-top: 20px; gap: 10px;">
+                <button class="play-all" onclick="playAllMixerSounds()">Play All</button>
+                <button class="stop-all" onclick="stopAllSounds()">Stop All</button>
+            </div>
+        </div>
+
+        <!-- Visualizer Tab -->
+        <div class="tab-content" id="visualizer">
+            <h2>Visualizer</h2>
+            <p>Watch the visualization react to the sounds you play.</p>
+            <div class="visualizer">
+                <canvas id="visualizer-canvas"></canvas>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button onclick="startVisualizer()">Start Visualizer</button>
+                <button onclick="stopVisualizer()">Stop Visualizer</button>
+            </div>
+        </div>
+
+        <!-- About Tab -->
+        <div class="tab-content" id="about">
+            <div class="info-section">
+                <h2>About Water Sounds Generator</h2>
+                <p>
+                    This single-page web app lets you explore, mix, and visualize a wide variety of water sounds.
+                    From the calming sound of ocean waves to the mysterious echoes of underwater environments,
+                    this app is perfect for relaxation, focus, or creative inspiration.
+                </p>
+                <p>
+                    All sounds are generated or played using the Web Audio API, ensuring a lightweight and responsive experience.
+                </p>
+            </div>
+            <div class="info-section">
+                <h2>Features</h2>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 10px;">✅ <strong>Soundboard:</strong> Play individual water sounds with a single click.</li>
+                    <li style="margin-bottom: 10px;">✅ <strong>Ambient Mixer:</strong> Mix multiple sounds to create custom ambiances.</li>
+                    <li style="margin-bottom: 10px;">✅ <strong>Visualizer:</strong> Real-time audio visualization that reacts to the sounds.</li>
+                    <li style="margin-bottom: 10px;">✅ <strong>Responsive Design:</strong> Works on desktop, tablet, and mobile devices.</li>
+                    <li style="margin-bottom: 10px;">✅ <strong>No Dependencies:</strong> Built with vanilla JavaScript, HTML, and CSS.</li>
+                </ul>
+            </div>
+            <div class="info-section">
+                <h2>How to Use</h2>
+                <ol style="padding-left: 20px;">
+                    <li><strong>Soundboard:</strong> Click on any sound card to play or stop the sound.</li>
+                    <li><strong>Ambient Mixer:</strong> Adjust the volume sliders and toggle sounds on/off to create your mix.</li>
+                    <li><strong>Visualizer:</strong> Play sounds and watch the canvas react in real-time.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Hosted on <a href="https://github.com" target="_blank">GitHub Pages</a> & <a href="https://pages.cloudflare.com" target="_blank">Cloudflare Pages</a> | Created with ❤️ for water sound enthusiasts</p>
+    </footer>
+
+    <script>
+        // Audio context and nodes
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const sounds = {};
+        const activeSounds = {};
+        let visualizerRunning = false;
+        let analyser;
+        let dataArray;
+        let canvasCtx;
+        let animationId;
+
+        // Sound files (using free samples from https://freesound.org or generated with Web Audio API)
+        // For a real app, replace these with actual audio files or generate them procedurally.
+        const soundFiles = {
+            'ocean-waves': 'https://assets.mixkit.co/sfx/preview/mixkit-ocean-waves-490.mp3',
+            'seashore': 'https://assets.mixkit.co/sfx/preview/mixkit-waves-on-the-seashore-1105.mp3',
+            'river': 'https://assets.mixkit.co/sfx/preview/mixkit-flowing-river-1130.mp3',
+            'waterfall': 'https://assets.mixkit.co/sfx/preview/mixkit-waterfall-1129.mp3',
+            'rain': 'https://assets.mixkit.co/sfx/preview/mixkit-rain-and-thunder-1144.mp3',
+            'dripping': 'https://assets.mixkit.co/sfx/preview/mixkit-water-drop-in-puddle-2078.mp3',
+            'thunderstorm': 'https://assets.mixkit.co/sfx/preview/mixkit-thunder-close-115.mp3',
+            'bubbles': 'https://assets.mixkit.co/sfx/preview/mixkit-bubbles-underwater-1132.mp3',
+            'underwater': 'https://assets.mixkit.co/sfx/preview/mixkit-underwater-ambience-1131.mp3',
+            'sonar': 'https://assets.mixkit.co/sfx/preview/mixkit-sonar-ping-2062.mp3',
+            'whale': 'https://assets.mixkit.co/sfx/preview/mixkit-whale-song-2061.mp3',
+            'splash': 'https://assets.mixkit.co/sfx/preview/mixkit-splash-in-water-2077.mp3',
+            'faucet': 'https://assets.mixkit.co/sfx/preview/mixkit-water-faucet-running-2075.mp3',
+            'boiling': 'https://assets.mixkit.co/sfx/preview/mixkit-water-boiling-2074.mp3',
+            'fountain': 'https://assets.mixkit.co/sfx/preview/mixkit-fountain-water-2076.mp3',
+            'scifi-water': null, // Procedurally generated
+            'magical-water': null, // Procedurally generated
+            'cartoon-water': null, // Procedurally generated
+            'steam': 'https://assets.mixkit.co/sfx/preview/mixkit-steam-release-2079.mp3'
+        };
+
+        // Initialize the app
+        window.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            initVisualizer();
+            loadSounds();
+        });
+
+        // Tab switching
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = document.getElementById(tab.dataset.tab);
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    target.classList.add('active');
+                });
+            });
+        }
+
+        // Load all sound files
+        async function loadSounds() {
+            for (const [name, url] of Object.entries(soundFiles)) {
+                if (url) {
+                    try {
+                        const response = await fetch(url);
+                        const arrayBuffer = await response.arrayBuffer();
+                        audioContext.decodeAudioData(arrayBuffer, (buffer) => {
+                            sounds[name] = buffer;
+                        });
+                    } catch (error) {
+                        console.error(`Failed to load sound: ${name}`, error);
+                        // Fallback: Generate a simple tone for missing sounds
+                        sounds[name] = generateFallbackSound(name);
+                    }
+                } else {
+                    // Procedurally generated sounds
+                    sounds[name] = generateFallbackSound(name);
+                }
+            }
+        }
+
+        // Generate a fallback sound using Web Audio API
+        function generateFallbackSound(name) {
+            const bufferLength = audioContext.sampleRate * 2;
+            const buffer = audioContext.createBuffer(1, bufferLength, audioContext.sampleRate);
+            const data = buffer.getChannelData(0);
+
+            // Generate different sounds based on name
+            switch (name) {
+                case 'scifi-water':
+                    for (let i = 0; i < bufferLength; i++) {
+                        data[i] = Math.sin(i * 0.01) * Math.random() * 0.1;
+                    }
+                    break;
+                case 'magical-water':
+                    for (let i = 0; i < bufferLength; i++) {
+                        data[i] = Math.sin(i * 0.005) * 0.1 + Math.sin(i * 0.02) * 0.05;
+                    }
+                    break;
+                case 'cartoon-water':
+                    for (let i = 0; i < bufferLength; i++) {
+                        data[i] = Math.sin(i * 0.1) * 0.2 * (1 - i / bufferLength);
+                    }
+                    break;
+                default:
+                    for (let i = 0; i < bufferLength; i++) {
+                        data[i] = Math.random() * 0.1 - 0.05;
+                    }
+            }
+
+            return buffer;
+        }
+
+        // Play a sound
+        function playSound(name) {
+            if (!sounds[name]) {
+                console.warn(`Sound "${name}" not loaded yet.`);
+                return;
+            }
+
+            // Stop if already playing
+            if (activeSounds[name]) {
+                activeSounds[name].stop();
+                delete activeSounds[name];
+                return;
+            }
+
+            const source = audioContext.createBufferSource();
+            source.buffer = sounds[name];
+            source.loop = true;
+
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0.5;
+
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            // Connect to analyser for visualizer
+            if (analyser) {
+                gainNode.connect(analyser);
+            }
+
+            source.start();
+            activeSounds[name] = { source, gainNode };
+        }
+
+        // Toggle a sound in the mixer
+        function toggleSound(name) {
+            if (activeSounds[name]) {
+                activeSounds[name].source.stop();
+                delete activeSounds[name];
+            } else {
+                if (!sounds[name]) {
+                    console.warn(`Sound "${name}" not loaded yet.`);
+                    return;
+                }
+                const source = audioContext.createBufferSource();
+                source.buffer = sounds[name];
+                source.loop = true;
+
+                const gainNode = audioContext.createGain();
+                gainNode.gain.value = 0; // Start at 0 volume
+
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Connect to analyser for visualizer
+                if (analyser) {
+                    gainNode.connect(analyser);
+                }
+
+                source.start();
+                activeSounds[name] = { source, gainNode };
+
+                // Set volume from slider
+                const slider = document.getElementById(`${name}-volume`);
+                if (slider) {
+                    gainNode.gain.value = slider.value / 100;
+                }
+            }
+        }
+
+        // Play all mixer sounds
+        function playAllMixerSounds() {
+            const mixerSounds = ['ocean-waves', 'rain', 'river', 'bubbles', 'thunderstorm', 'underwater'];
+            mixerSounds.forEach(name => {
+                if (!activeSounds[name]) {
+                    toggleSound(name);
+                }
+            });
+        }
+
+        // Stop all sounds
+        function stopAllSounds() {
+            for (const name in activeSounds) {
+                activeSounds[name].source.stop();
+                delete activeSounds[name];
+            }
+        }
+
+        // Update mixer volume
+        document.querySelectorAll('.slider').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const name = e.target.id.replace('-volume', '');
+                if (activeSounds[name]) {
+                    activeSounds[name].gainNode.gain.value = e.target.value / 100;
+                }
+            });
+        });
+
+        // Visualizer
+        function initVisualizer() {
+            const canvas = document.getElementById('visualizer-canvas');
+            canvasCtx = canvas.getContext('2d');
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            const bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+
+            // Connect all future sounds to the analyser
+            // (This is handled in playSound and toggleSound)
+        }
+
+        function startVisualizer() {
+            if (visualizerRunning) return;
+            visualizerRunning = true;
+            drawVisualizer();
+        }
+
+        function stopVisualizer() {
+            visualizerRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        function drawVisualizer() {
+            if (!visualizerRunning) return;
+
+            requestAnimationFrame(drawVisualizer);
+            analyser.getByteFrequencyData(dataArray);
+
+            const canvas = document.getElementById('visualizer-canvas');
+            const width = canvas.width;
+            const height = canvas.height;
+            canvasCtx.clearRect(0, 0, width, height);
+
+            const barWidth = (width / dataArray.length) * 2.5;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                const barHeight = (dataArray[i] / 255) * height;
+
+                const hue = i / dataArray.length * 360;
+                canvasCtx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                canvasCtx.fillRect(x, height - barHeight, barWidth, barHeight);
+
+                x += barWidth + 1;
+            }
+        }
+
+        // Auto-start visualizer when sounds play
+        function checkAndStartVisualizer() {
+            if (Object.keys(activeSounds).length > 0 && !visualizerRunning) {
+                startVisualizer();
+            } else if (Object.keys(activeSounds).length === 0 && visualizerRunning) {
+                stopVisualizer();
+            }
+        }
+
+        // Modify playSound and toggleSound to call checkAndStartVisualizer
+        const originalPlaySound = playSound;
+        playSound = function(name) {
+            originalPlaySound(name);
+            checkAndStartVisualizer();
+        };
+
+        const originalToggleSound = toggleSound;
+        toggleSound = function(name) {
+            originalToggleSound(name);
+            checkAndStartVisualizer();
+        };
+    </script>
+</body>
+</html>
